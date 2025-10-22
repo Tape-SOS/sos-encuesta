@@ -72,22 +72,26 @@
 
     try{
       const res = await fetch(FLOW_URL, {
-        method: "POST",
-        headers: {"Content-Type":"text/plain;charset=UTF-8"},
-        body: payload,
-        cache: "no-store"
-      });
-      const data = await res.json().catch(()=> ({}));
+  method: "POST",
+  headers: {"Content-Type":"text/plain;charset=UTF-8"},
+  body: payload,
+  cache: "no-store"
+});
 
-      if(res.ok && data?.status === "ok"){
-        show("¡Gracias! Tu calificación fue registrada.", true);
-        form.reset();
-        form.classList.add("hidden");
-      }else{
-        const msg = data?.message || `No se pudo registrar la calificación (HTTP ${res.status}).`;
-        show(msg, false);
-        sendBtn.disabled = false;
-      }
+let data = null;
+let text = await res.text();
+try { data = JSON.parse(text); } catch {}
+const serverMsg = (data && data.message) ? data.message : (text || "");
+
+if (res.ok && data?.status === "ok") {
+  show("¡Gracias! Tu calificación fue registrada.", true);
+  form.reset();
+  form.classList.add("hidden");
+} else {
+  show(serverMsg || `No se pudo registrar la calificación (HTTP ${res.status}).`, false);
+  sendBtn.disabled = false;
+}
+
     }catch(err){
       show("Error de red al enviar la calificación. Intenta de nuevo.", false);
       sendBtn.disabled = false;

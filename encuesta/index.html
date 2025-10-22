@@ -1,205 +1,58 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Evaluación de Servicio</title>
-  <meta name="color-scheme" content="light dark" />
-  <style>
-    :root { --fg:#111; --bg:#fff; --muted:#666; --accent:#0a7d2f; --warn:#b00020; }
-    @media (prefers-color-scheme: dark){ :root{ --fg:#eee; --bg:#111; --muted:#aaa } }
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial}
-    .wrap{max-width:760px;margin:24px auto;padding:20px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px}
-    h1{font-size:24px;margin:0}
-    .card{border:1px solid #e3e3e3; border-radius:14px; padding:18px; box-shadow:0 1px 4px rgba(0,0,0,.05)}
-    .q{margin:22px 0}
-    .q h3{font-size:16px;margin:0 0 8px 0}
-    .stars{display:inline-flex;flex-direction:row-reverse;gap:6px}
-    .stars input{position:absolute;opacity:0;pointer-events:none}
-    .star{font-size:28px;cursor:pointer;filter:grayscale(.4);}
-    .stars input:focus + label{outline:2px solid #7aa9ff;outline-offset:2px;border-radius:6px}
-    .stars label{user-select:none}
-    .stars input:checked ~ label{filter:none}
-    .star::before{content:"★"}
-    .muted{color:var(--muted)}
-    .actions{margin-top:18px;display:flex;gap:12px;align-items:center}
-    button{padding:10px 16px;border-radius:10px;border:1px solid #d5d5d5;background:#f7f7f7;cursor:pointer}
-    button.primary{background:#0a7d2f;color:#fff;border-color:#0a7d2f}
-    .ok{color:var(--accent)}
-    .err{color:var(--warn)}
-    .hide{display:none}
-    textarea{width:100%;min-height:84px;border-radius:8px;border:1px solid #d5d5d5;padding:10px}
-    .footer{margin-top:24px;font-size:13px}
-    .badge{display:inline-flex;gap:6px;align-items:center;padding:6px 10px;border-radius:999px;background:#f1f5f9;border:1px solid #e5e7eb}
-    .pill{display:inline-block;padding:2px 8px;border-radius:6px;background:#ecfdf5;color:#065f46;font-weight:600;font-size:12px}
-  </style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Califica tu atención</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="stylesheet" href="assets/style.css"/>
 </head>
 <body>
-  <div class="wrap">
+  <main class="container">
     <header>
-      <h1>Evalúa la atención recibida</h1>
-      <span id="evt" class="badge" aria-live="polite">Evento: <strong id="evtId">—</strong></span>
+      <h1>Ayúdanos a mejorar</h1>
+      <p>Califica tu experiencia. Tu opinión es muy valiosa.</p>
     </header>
 
-    <div id="gate" class="card">
-      <p class="muted">Cargando información de la encuesta…</p>
-    </div>
+    <section id="state" class="hidden"></section>
 
-    <form id="form" class="card hide" novalidate>
-      <p class="muted">Tu opinión nos ayuda a mejorar. Califica del <strong>1</strong> (muy baja) al <strong>5</strong> (excelente).
-      </p>
-
-      <div class="q" role="group" aria-labelledby="q1-label">
-        <h3 id="q1-label">1) ¿Cómo calificarías la atención de la empresa en general cuando tuviste el incidente?</h3>
-        <div class="stars" data-name="atencion" aria-label="Atención general">
-          <input id="q1-5" type="radio" name="atencion" value="5" /><label for="q1-5" class="star" aria-label="5 estrellas"></label>
-          <input id="q1-4" type="radio" name="atencion" value="4" /><label for="q1-4" class="star" aria-label="4 estrellas"></label>
-          <input id="q1-3" type="radio" name="atencion" value="3" /><label for="q1-3" class="star" aria-label="3 estrellas"></label>
-          <input id="q1-2" type="radio" name="atencion" value="2" /><label for="q1-2" class="star" aria-label="2 estrellas"></label>
-          <input id="q1-1" type="radio" name="atencion" value="1" /><label for="q1-1" class="star" aria-label="1 estrella"></label>
-        </div>
+    <form id="ratingForm" class="card">
+      <input type="hidden" id="eventId">
+      <input type="hidden" id="token">
+      
+      <div class="block">
+        <label class="q">1) ¿Cómo calificaría la atención de la empresa?</label>
+        <div class="stars" data-field="attention"></div>
       </div>
 
-      <div class="q" role="group" aria-labelledby="q2-label">
-        <h3 id="q2-label">2) ¿Cómo calificarías la solución de tu problema?</h3>
-        <div class="stars" data-name="solucion" aria-label="Solución del problema">
-          <input id="q2-5" type="radio" name="solucion" value="5" /><label for="q2-5" class="star" aria-label="5 estrellas"></label>
-          <input id="q2-4" type="radio" name="solucion" value="4" /><label for="q2-4" class="star" aria-label="4 estrellas"></label>
-          <input id="q2-3" type="radio" name="solucion" value="3" /><label for="q2-3" class="star" aria-label="3 estrellas"></label>
-          <input id="q2-2" type="radio" name="solucion" value="2" /><label for="q2-2" class="star" aria-label="2 estrellas"></label>
-          <input id="q2-1" type="radio" name="solucion" value="1" /><label for="q2-1" class="star" aria-label="1 estrella"></label>
-        </div>
+      <div class="block">
+        <label class="q">2) ¿Cómo calificaría la solución de su problema?</label>
+        <div class="stars" data-field="solution"></div>
       </div>
 
-      <div class="q" role="group" aria-labelledby="q3-label">
-        <h3 id="q3-label">3) ¿Cómo calificarías la educación y cortesía de los asistentes?</h3>
-        <div class="stars" data-name="cortesia" aria-label="Cortesía del personal">
-          <input id="q3-5" type="radio" name="cortesia" value="5" /><label for="q3-5" class="star" aria-label="5 estrellas"></label>
-          <input id="q3-4" type="radio" name="cortesia" value="4" /><label for="q3-4" class="star" aria-label="4 estrellas"></label>
-          <input id="q3-3" type="radio" name="cortesia" value="3" /><label for="q3-3" class="star" aria-label="3 estrellas"></label>
-          <input id="q3-2" type="radio" name="cortesia" value="2" /><label for="q3-2" class="star" aria-label="2 estrellas"></label>
-          <input id="q3-1" type="radio" name="cortesia" value="1" /><label for="q3-1" class="star" aria-label="1 estrella"></label>
-        </div>
+      <div class="block">
+        <label class="q">3) ¿Cómo calificaría el tiempo de espera?</label>
+        <div class="stars" data-field="wait"></div>
       </div>
 
-      <div class="q" role="group" aria-labelledby="q4-label">
-        <h3 id="q4-label">4) ¿Cómo calificarías el tiempo de espera?</h3>
-        <div class="stars" data-name="tiempo" aria-label="Tiempo de espera">
-          <input id="q4-5" type="radio" name="tiempo" value="5" /><label for="q4-5" class="star" aria-label="5 estrellas"></label>
-          <input id="q4-4" type="radio" name="tiempo" value="4" /><label for="q4-4" class="star" aria-label="4 estrellas"></label>
-          <input id="q4-3" type="radio" name="tiempo" value="3" /><label for="q4-3" class="star" aria-label="3 estrellas"></label>
-          <input id="q4-2" type="radio" name="tiempo" value="2" /><label for="q4-2" class="star" aria-label="2 estrellas"></label>
-          <input id="q4-1" type="radio" name="tiempo" value="1" /><label for="q4-1" class="star" aria-label="1 estrella"></label>
-        </div>
+      <div class="block">
+        <label for="comment" class="q">Comentario opcional</label>
+        <textarea id="comment" placeholder="Escribe tu comentario (opcional)" maxlength="1000"></textarea>
       </div>
 
-      <div class="q">
-        <h3>Comentarios (opcional)</h3>
-        <textarea id="comentarios" maxlength="800" placeholder="Cuéntanos en qué podemos mejorar"></textarea>
-      </div>
-
-      <div class="actions">
-        <button type="button" id="btnSend" class="primary">Enviar evaluación</button>
-        <span id="status" class="muted" aria-live="polite"></span>
-      </div>
-
-      <p class="footer muted">
-        Al enviar aceptas el uso de tu respuesta para fines de mejora del servicio. <span class="pill">1 envío por evento</span>
-      </p>
+      <button id="sendBtn" type="submit">Enviar calificación</button>
+      <p id="legal">Al enviar aceptas nuestra política de privacidad.</p>
     </form>
 
-    <div id="done" class="card hide">
-      <p class="ok"><strong>¡Gracias!</strong> Tu evaluación fue registrada correctamente.</p>
-    </div>
-
-    <div id="error" class="card hide">
-      <p class="err"><strong>No pudimos validar tu enlace.</strong> Verifica que lo hayas abierto desde el SMS más reciente o solicita uno nuevo.</p>
-    </div>
-  </div>
+    <footer>
+      <small>© <span id="y"></span> Tu Empresa</small>
+    </footer>
+  </main>
 
   <script>
-    const qs = new URLSearchParams(location.search);
-    const eventId = qs.get('e');
-    const token   = qs.get('t');
-    const gate = document.getElementById('gate');
-    const form = document.getElementById('form');
-    const done = document.getElementById('done');
-    const errorBox = document.getElementById('error');
-    const statusEl = document.getElementById('status');
-    const evtIdEl = document.getElementById('evtId');
-    const btn = document.getElementById('btnSend');
-
-    // Obscure parcial del ID (ej. 12345 → 12***45)
-    function maskId(id){
-      if(!id) return '—';
-      const s = String(id);
-      if(s.length <= 4) return s;
-      return s.slice(0,2) + '***' + s.slice(-2);
-    }
-
-    // Validación básica de querystring
-    (function init(){
-      if(!eventId || !token){
-        gate.classList.add('hide');
-        errorBox.classList.remove('hide');
-        return;
-      }
-      evtIdEl.textContent = maskId(eventId);
-      gate.innerHTML = '<span class="muted">Enlace verificado. Puedes completar tu evaluación.</span>';
-      form.classList.remove('hide');
-    })();
-
-    function ratingValue(name){
-      const checked = document.querySelector(`input[name="${name}"]:checked`);
-      return checked ? Number(checked.value) : null;
-    }
-
-    function allValid(){
-      return ["atencion","solucion","cortesia","tiempo"].every(n => ratingValue(n) !== null);
-    }
-
-    async function submit(){
-      if(!allValid()){
-        statusEl.textContent = 'Selecciona una calificación en cada pregunta (1 a 5).';
-        return;
-      }
-      btn.disabled = true; statusEl.textContent = 'Enviando…';
-      try{
-        const res = await fetch('/api/submit-rating',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            eventId,
-            token,
-            scores:{
-              atencion: ratingValue('atencion'),
-              solucion: ratingValue('solucion'),
-              cortesia: ratingValue('cortesia'),
-              tiempo:   ratingValue('tiempo')
-            },
-            comments: document.getElementById('comentarios').value?.trim() || null,
-            source: 'portal-swa'
-          })
-        });
-        if(res.ok){
-          form.classList.add('hide');
-          gate.classList.add('hide');
-          done.classList.remove('hide');
-        }else{
-          const msg = await res.text();
-          throw new Error(msg || 'Error de envío');
-        }
-      }catch(err){
-        console.error(err);
-        statusEl.textContent = '';
-        form.classList.add('hide'); gate.classList.add('hide'); errorBox.classList.remove('hide');
-      }finally{
-        btn.disabled = false;
-      }
-    }
-
-    btn.addEventListener('click', submit);
+    // Configurar aquí tu endpoint HTTP del Flow (Sección 4)
+    const FLOW_URL = "YOUR_FLOW_URL";
   </script>
+  <script src="assets/app.js"></script>
 </body>
 </html>

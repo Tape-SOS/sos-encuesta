@@ -5,9 +5,24 @@ h1{margin:0 0 8px;font-size:28px}
 .card{background:#0b1220;border:1px solid #243042;border-radius:16px;padding:16px}
 .block{margin:14px 0}
 .q{display:block;margin:0 0 8px;font-weight:600}
+
 .stars{display:flex;gap:8px}
-.star{font-size:28px;cursor:pointer;user-select:none;transition:transform .05s ease}
+.stars .star{
+  font-size:28px;
+  cursor:pointer;
+  user-select:none;
+  transform:translateZ(0);
+  transition:color .15s ease, transform .05s ease;
+  color:#64748b;            /* gris base */
+}
+.stars .star.is-active{      /* seleccionadas */
+  color:#facc15;            /* AMARILLO */
+}
+.stars .star:hover{          /* vista previa al pasar */
+  color:#facc15;
+}
 .star:hover,.star.is-active{transform:scale(1.08)}
+
 textarea{width:100%;min-height:100px;border-radius:10px;border:1px solid #243042;background:#0f172a;color:#e2e8f0;padding:10px}
 button{display:inline-block;width:100%;padding:12px 16px;border:0;border-radius:12px;background:#22c55e;color:#052e11;font-weight:700;cursor:pointer}
 button:disabled{opacity:.6;cursor:not-allowed}
